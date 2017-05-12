@@ -3,7 +3,7 @@ name = "comment_units"
 version = "0.1.0"
 authors = ["Willi Kappler <grandor@gmx.de>"]
 license = "MIT"
-description = "check physical units in comments"
+description = "check physical units in source comments"
 readme = "README.md"
 repository = "https://github.com/willi-kappler/comment_units"
 keywords = ["physics", "units", "science"]
@@ -11,5 +11,5 @@ categories = ["science"]
 documentation = "https://docs.rs/comment_units/0.1.0/comment_units/"
 
 [dependencies]
-nom = "2.2.1"
+nom = "3.0"
 clap = "2.24.1"

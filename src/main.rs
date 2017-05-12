@@ -32,11 +32,11 @@ fn main() {
             .short("l")
             .long("languages")
             .value_name("LANGUAGES")
-            .help(("The programming language(s) of the input source file(s).\n".to_owned() +
-                  "Default is to check for all supported languages.\n" +
-                  "Otherwise only the provided soure files will be checked, based on the file extension.\n" +
-                  "You can provie multiple languages, these are currently supported:\n" +
-                  "rust, fortran, matlab").as_str()
+            .help("The programming language(s) of the input source file(s).\n\
+                  Default is to check for all supported languages.\n\
+                  Otherwise only the provided soure files will be checked, based on the file extension.\n\
+                  You can provie multiple languages, these are currently supported:\n\
+                  rust, fortran, matlab"
               )
             .takes_value(true)
             .required(false))
