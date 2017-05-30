@@ -5,9 +5,19 @@
 // A tool to check the physical units described in comments
 //
 
+// External crates:
 extern crate clap;
 
+// Std modules
+use std::env;
+
+// External modules:
 use clap::{App, Arg};
+
+// Local modules
+mod file_util;
+
+use file_util::{process_folder, extract_language_extensions};
 
 fn main() {
     let matches = App::new("My Super Program")
@@ -35,12 +45,23 @@ fn main() {
             .help("The programming language(s) of the input source file(s).\n\
                   Default is to check for all supported languages.\n\
                   Otherwise only the provided soure files will be checked, based on the file extension.\n\
-                  You can provie multiple languages, these are currently supported:\n\
+                  You can provie multiple languages (separated by comma), these are currently supported:\n\
                   rust, fortran, matlab"
               )
             .takes_value(true)
             .required(false))
         .get_matches();
+
+    let languages = match matches.value_of("languages") {
+        Some(languages) => extract_language_extensions(languages),
+        None => vec![// Rust:
+                     "rs",
+                     // Fortran:
+                     "f90",
+                     // Matlab:
+                     "m"
+                     ]
+    };
 
     match matches.value_of("file") {
         Some(input_file) => {
@@ -50,9 +71,12 @@ fn main() {
             match matches.value_of("directory") {
                 Some(input_directory) => {
                     println!("input directory: '{}'", input_directory);
+                    process_folder(input_directory, languages);
                 }
                 None => {
-                    println!("current directory")
+                    println!("current directory");
+                    let current_dir = env::current_dir().unwrap();
+                    process_folder(current_dir.to_str().unwrap(), languages);
                 }
             }
         }
