@@ -7,6 +7,7 @@
 
 // External crates:
 extern crate clap;
+extern crate walkdir;
 
 // Std modules
 use std::env;
@@ -17,7 +18,7 @@ use clap::{App, Arg};
 // Local modules
 mod file_util;
 
-use file_util::{process_folder, extract_language_extensions};
+use file_util::{process_folder, extract_language_extensions, consider_file, process_file};
 
 fn main() {
     let matches = App::new("My Super Program")
@@ -66,6 +67,9 @@ fn main() {
     match matches.value_of("file") {
         Some(input_file) => {
             println!("single input file: '{}''", input_file);
+            if consider_file(input_file, &languages) {
+                process_file(input_file)
+            }
         },
         None => {
             match matches.value_of("directory") {
