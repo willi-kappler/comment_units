@@ -4,6 +4,11 @@ use walkdir::WalkDir;
 // Std modules
 use std::fmt;
 
+// Local modules
+use language_rust::process_language_rust;
+use language_fortran::process_language_fortran;
+use language_matlab::process_language_matlab;
+
 /// Currently supported languages:
 pub fn supported_languages<'a>() -> Vec<&'a str> {
     vec![// Rust:
@@ -63,6 +68,13 @@ pub fn consider_file(file: &str, lang_filter: &Vec<&str>) -> Option<SupportedLan
 
 pub fn process_file(file_name: &str, language: SupportedLanguage) {
     println!("processing file: '{}' written in language: '{}'", file_name, language);
+
+    match language {
+        SupportedLanguage::Rust => process_language_rust(file_name),
+        SupportedLanguage::Fortran => process_language_fortran(file_name),
+        SupportedLanguage::Matlab => process_language_matlab(file_name),
+        _ => println!("language '{}' currently not supported!", language)
+    }
 }
 
 fn file_extension_to_language(file_extension: &str) -> Option<SupportedLanguage> {

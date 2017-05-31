@@ -17,6 +17,9 @@ use clap::{App, Arg};
 
 // Local modules
 mod file_util;
+mod language_rust;
+mod language_fortran;
+mod language_matlab;
 
 use file_util::{process_folder, extract_language_extensions, consider_file, process_file,
         supported_languages};
