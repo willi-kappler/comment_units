@@ -18,7 +18,8 @@ use clap::{App, Arg};
 // Local modules
 mod file_util;
 
-use file_util::{process_folder, extract_language_extensions, consider_file, process_file};
+use file_util::{process_folder, extract_language_extensions, consider_file, process_file,
+        supported_languages};
 
 fn main() {
     let matches = App::new("My Super Program")
@@ -55,20 +56,14 @@ fn main() {
 
     let languages = match matches.value_of("languages") {
         Some(languages) => extract_language_extensions(languages),
-        None => vec![// Rust:
-                     "rs",
-                     // Fortran:
-                     "f90",
-                     // Matlab:
-                     "m"
-                     ]
+        None => supported_languages()
     };
 
     match matches.value_of("file") {
         Some(input_file) => {
             println!("single input file: '{}''", input_file);
-            if consider_file(input_file, &languages) {
-                process_file(input_file)
+            if let Some(language) = consider_file(input_file, &languages) {
+                process_file(input_file, language)
             }
         },
         None => {
