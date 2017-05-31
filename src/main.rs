@@ -25,7 +25,7 @@ use file_util::{process_folder, extract_language_extensions, consider_file, proc
         supported_languages};
 
 fn main() {
-    let matches = App::new("My Super Program")
+    let matches = App::new("comment_units")
         .version("0.1")
         .author("Willi Kappler. <grandor@gmx.de>")
         .about("Check physical units in comments")
@@ -51,10 +51,22 @@ fn main() {
                   Default is to check for all supported languages.\n\
                   Otherwise only the provided soure files will be checked, based on the file extension.\n\
                   You can provie multiple languages (separated by comma), these are currently supported:\n\
-                  rust, fortran, matlab"
-              )
+                  rs (Rust), f90 (Fortran), m (Matlab)")
             .takes_value(true)
             .required(false))
+        .after_help(
+              "Examples:\n\n\
+              comment_units                 # process all supported source files recursively in the current directory.\n\
+              \n\
+              comment_units -d source       # process all supported source files recursively in the directory 'source'.\n\
+              \n\
+              comment_units -f main.f90     # process only the file 'main.f90'.\n\
+              \n\
+              comment_units -d build -l rs  # process all Rust (rs) files recursively in the directory 'build'.\n\
+              \n\
+              comment_units -l rs,m         # process all Rust and Matlab (rs,m) files recursively in the current directory.\n\
+              "
+          )
         .get_matches();
 
     let languages = match matches.value_of("languages") {
@@ -83,5 +95,4 @@ fn main() {
             }
         }
     }
-
 }
