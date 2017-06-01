@@ -8,6 +8,7 @@
 // External crates:
 extern crate clap;
 extern crate walkdir;
+#[macro_use] extern crate nom;
 
 // Std modules
 use std::env;
