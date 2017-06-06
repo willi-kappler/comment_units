@@ -11,6 +11,5 @@ categories = ["science"]
 documentation = "https://docs.rs/comment_units/0.1.0/comment_units/"
 
 [dependencies]
-nom = "3.0"
 clap = "2.24"
 walkdir = "1"
