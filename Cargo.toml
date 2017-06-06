@@ -13,3 +13,7 @@ documentation = "https://docs.rs/comment_units/0.1.0/comment_units/"
 [dependencies]
 clap = "2.24"
 walkdir = "1"
+
+[dependencies.nom]
+version = "3.0"
+features = ["verbose-errors"]
