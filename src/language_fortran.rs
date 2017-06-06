@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::io::Read;
 
-use nom::{alphanumeric};
+use nom::{alphanumeric, IResult};
+use nom;
 
 #[derive(PartialEq, Debug)]
 enum FortranTokenType {
@@ -16,19 +17,30 @@ struct Token {
     token: FortranTokenType
 }
 
-named!(parse_comment<&str, Option<FortranTokenType>>, ws!(opt!(
-    do_parse!(
-        tag!("!") >>
-        content: take_while!(call!(|c| c != '\n')) >>
-        (FortranTokenType::Comment(content.to_string()))
-    ))));
+fn easy_nom_error<'a>(error_code: u32) -> nom::IResult<&'a str, Option<FortranTokenType>> {
+    IResult::Error(nom::Err::Code(nom::ErrorKind::Custom(error_code)))
+}
 
-named!(parse_comment_line<&str, FortranTokenType>, ws!(
-    do_parse!(
-        tag!("!") >>
-        content: take_while!(call!(|c| c != '\n')) >>
-        (FortranTokenType::Comment(content.to_string()))
-    )));
+fn parse_comment(input: &str) -> IResult<&str, Option<FortranTokenType>> {
+    if input.len() == 0 {
+        return IResult::Done(&input, None)
+    } else {
+        for (i, c) in input.chars().enumerate() {
+            match c {
+                '!' => return IResult::Done(&input[0..i], Some(FortranTokenType::Comment(input[i+1..].to_owned()))),
+                ' ' | '\t' => continue,
+                _ => return easy_nom_error(1)
+            }
+        }
+    }
+    IResult::Done(&input, None)
+}
+
+named!(parse_comment_line<&str, FortranTokenType>, do_parse!(
+    tag!("!") >>
+    content: take_while!(call!(|c| c != '\n')) >>
+    (FortranTokenType::Comment(content.to_string()))
+));
 
 named!(parse_many_comment_lines<&str, Vec<FortranTokenType> >, many0!(parse_comment_line));
 
@@ -99,5 +111,174 @@ pub fn process_language_fortran(file_name: &str) {
 
     let result = parse_code(&buffer);
     println!("result: {:?}", result);
+
+}
+
+#[cfg(test)]
+mod test {
+    use nom::{IResult};
+
+    use super::{FortranTokenType, easy_nom_error, parse_comment, parse_comment_line,
+        parse_many_comment_lines, parse_identifier, parse_program, parse_module, parse_code};
+
+    #[test]
+    fn parse_comment1() {
+        let input = "";
+        let expected_output = IResult::Done("", None);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment2() {
+        let input = " ";
+        let expected_output = IResult::Done(" ", None);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment3() {
+        let input = "!";
+        let expected_output = IResult::Done("", Some(FortranTokenType::Comment("".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment4() {
+        let input = " !";
+        let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment("".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment5() {
+        let input = " ! ";
+        let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment(" ".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment6() {
+        let input = "!Test";
+        let expected_output = IResult::Done("", Some(FortranTokenType::Comment("Test".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment7() {
+        let input = "! Test";
+        let expected_output = IResult::Done("", Some(FortranTokenType::Comment(" Test".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment8() {
+        let input = " ! Test";
+        let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment(" Test".to_owned())));
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment9() {
+        let input = "x";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment10() {
+        let input = " x";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment11() {
+        let input = " x ";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment12() {
+        let input = " x!";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment13() {
+        let input = " x !";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment14() {
+        let input = " x ! ";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment15() {
+        let input = " x !Test";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn parse_comment16() {
+        let input = " x ! Test";
+        let expected_output = easy_nom_error(1);
+
+        let result = parse_comment(input);
+
+        assert_eq!(result, expected_output);
+    }
 
 }
