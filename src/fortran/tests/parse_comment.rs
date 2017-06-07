@@ -1,11 +1,11 @@
-use nom::{IResult};
+use nom::{IResult, Needed, Err, ErrorKind};
 
-use super::super::{FortranTokenType, custom_nom_error_option, custom_nom_error, parse_comment};
+use super::super::{FortranTokenType, parse_comment};
 
 #[test]
 fn parse_comment1() {
     let input = "";
-    let expected_output = IResult::Done("", None);
+    let expected_output = IResult::Incomplete(Needed::Size(1));
 
     let result = parse_comment(input);
 
@@ -15,7 +15,7 @@ fn parse_comment1() {
 #[test]
 fn parse_comment2() {
     let input = " ";
-    let expected_output = IResult::Done(" ", None);
+    let expected_output = IResult::Error(Err::Position(ErrorKind::Tag, " "));
 
     let result = parse_comment(input);
 
@@ -24,8 +24,8 @@ fn parse_comment2() {
 
 #[test]
 fn parse_comment3() {
-    let input = "!";
-    let expected_output = IResult::Done("", Some(FortranTokenType::Comment("".to_owned())));
+    let input = "x";
+    let expected_output = IResult::Error(Err::Position(ErrorKind::Tag, "x"));
 
     let result = parse_comment(input);
 
@@ -34,8 +34,8 @@ fn parse_comment3() {
 
 #[test]
 fn parse_comment4() {
-    let input = " !";
-    let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment("".to_owned())));
+    let input = "!";
+    let expected_output = IResult::Done("", FortranTokenType::Comment("".to_owned()));
 
     let result = parse_comment(input);
 
@@ -44,8 +44,8 @@ fn parse_comment4() {
 
 #[test]
 fn parse_comment5() {
-    let input = " ! ";
-    let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment(" ".to_owned())));
+    let input = "! Test1";
+    let expected_output = IResult::Done("", FortranTokenType::Comment(" Test1".to_owned()));
 
     let result = parse_comment(input);
 
@@ -54,8 +54,8 @@ fn parse_comment5() {
 
 #[test]
 fn parse_comment6() {
-    let input = "!Test";
-    let expected_output = IResult::Done("", Some(FortranTokenType::Comment("Test".to_owned())));
+    let input = "! Test2\n";
+    let expected_output = IResult::Done("\n", FortranTokenType::Comment(" Test2".to_owned()));
 
     let result = parse_comment(input);
 
@@ -64,8 +64,8 @@ fn parse_comment6() {
 
 #[test]
 fn parse_comment7() {
-    let input = "! Test";
-    let expected_output = IResult::Done("", Some(FortranTokenType::Comment(" Test".to_owned())));
+    let input = "! Test3\n\n";
+    let expected_output = IResult::Done("\n\n", FortranTokenType::Comment(" Test3".to_owned()));
 
     let result = parse_comment(input);
 
@@ -74,88 +74,8 @@ fn parse_comment7() {
 
 #[test]
 fn parse_comment8() {
-    let input = " ! Test";
-    let expected_output = IResult::Done(" ", Some(FortranTokenType::Comment(" Test".to_owned())));
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment9() {
-    let input = "x";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment10() {
-    let input = " x";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment11() {
-    let input = " x ";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment12() {
-    let input = " x!";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment13() {
-    let input = " x !";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment14() {
-    let input = " x ! ";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment15() {
-    let input = " x !Test";
-    let expected_output = custom_nom_error_option(1);
-
-    let result = parse_comment(input);
-
-    assert_eq!(result, expected_output);
-}
-
-#[test]
-fn parse_comment16() {
-    let input = " x ! Test";
-    let expected_output = custom_nom_error_option(1);
+    let input = "! Test4\n x = 5 ! comment";
+    let expected_output = IResult::Done("\n x = 5 ! comment", FortranTokenType::Comment(" Test4".to_owned()));
 
     let result = parse_comment(input);
 

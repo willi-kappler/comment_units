@@ -3,13 +3,13 @@
 use std::fs::File;
 use std::io::Read;
 
-use nom::{alphanumeric, IResult};
+use nom::{alpha, alphanumeric};
 use nom;
 
 #[derive(PartialEq, Debug)]
 enum FortranTokenType {
     Comment(String),            // Simgle line comment with !
-    Itentifier(String),         // distance, particle_id
+    Identifier(String),         // distance, particle_id
 }
 
 #[derive(PartialEq, Debug)]
@@ -19,92 +19,33 @@ struct Token {
     token: FortranTokenType
 }
 
-fn custom_nom_error_option<'a>(error_code: u32) -> nom::IResult<&'a str, Option<FortranTokenType>> {
-    IResult::Error(nom::Err::Code(nom::ErrorKind::Custom(error_code)))
-}
+named!(parse_comment<&str, FortranTokenType>, do_parse!(
+    tag!("!") >>
+    comment: take_while!(call!(|c| c != '\n')) >>
+    (FortranTokenType::Comment(comment.to_owned()))
+));
 
-fn custom_nom_error<'a>(error_code: u32) -> nom::IResult<&'a str, FortranTokenType> {
-    IResult::Error(nom::Err::Code(nom::ErrorKind::Custom(error_code)))
-}
+named!(parse_many_comment_lines<&str, Vec<FortranTokenType> >, many0!(ws!(parse_comment)));
 
-fn parse_comment(input: &str) -> IResult<&str, Option<FortranTokenType>> {
-    if input.len() == 0 {
-        return IResult::Done(&input, None)
-    } else {
-        for (i, c) in input.chars().enumerate() {
-            match c {
-                '!' => return IResult::Done(&input[0..i], Some(FortranTokenType::Comment(input[i+1..].to_owned()))),
-                ' ' | '\t' => continue,
-                _ => return custom_nom_error_option(1)
-            }
-        }
-    }
-    IResult::Done(&input, None)
-}
-
-fn parse_comment_line(input: &str) -> IResult<&str, FortranTokenType> {
-    if input.len() == 0 {
-        return custom_nom_error(2)
-    } else {
-        for (i, c) in input.chars().enumerate() {
-            match c {
-                '!' => return IResult::Done(&input[0..i], FortranTokenType::Comment(input[i+1..].to_owned())),
-                ' ' | '\t' => continue,
-                _ => return custom_nom_error(2)
-            }
-        }
-    }
-    custom_nom_error(2)
-}
-
-named!(parse_many_comment_lines<&str, Vec<FortranTokenType> >, many0!(parse_comment_line));
-
-// fn parse_identifier(input: &str) -> IResult<&str, String> {
-//     if input.len() == 0 {
-//         IResult::Incomplete(Needed::Unknown)
-//     } else {
-//         if !input[0].is_alphabetic() {
-//             IResult::Error
-//         } else {
-//             IResult::Done
-//         }
-//     }
-// }
-
-named!(parse_identifier<&str, String>, do_parse!(
-    values: many1!(alt!(alphanumeric | tag!("_"))) >>
-    (values.join(""))
+named!(parse_identifier<&str, FortranTokenType>, do_parse!(
+    head: alpha >>
+    tail: many0!(alt!(alphanumeric | tag!("_"))) >>
+    (FortranTokenType::Identifier(head.to_owned()))
 ));
 
 named!(parse_program<&str, Vec<FortranTokenType> >, do_parse!(
     ws!(tag!("program")) >>
     ws!(parse_identifier) >>
-    // parse_use_statements >>
-    // parse_implicit_statements >>
-    // variable_decls: parse_variable_declarations >>
-    // statements: parse_statements >>
-    // parse_many_comment_lines >>
     ws!(tag!("end")) >>
     ws!(tag!("program")) >>
-    ws!(parse_identifier) >>
-    parse_comment >>
-    parse_many_comment_lines >>
-    //(variable_decls.extend(&statements))
-
-    parse_comment >>
     (Vec::new())
 ));
 
 named!(parse_module<&str, Vec<FortranTokenType> >, do_parse!(
-    ws!(tag!("program")) >>
+    ws!(tag!("module")) >>
     ws!(parse_identifier) >>
-    parse_comment >>
-    // TODO: add function and subroutine
     ws!(tag!("end")) >>
-    ws!(tag!("program")) >>
-    ws!(parse_identifier) >>
-    parse_comment >>
-    parse_many_comment_lines >>
+    ws!(tag!("module")) >>
     (Vec::new())
 ));
 
