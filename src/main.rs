@@ -17,12 +17,12 @@ use std::env;
 use clap::{App, Arg};
 
 // Local modules
-mod file_util;
-mod language_rust;
-mod language_fortran;
-mod language_matlab;
+mod common;
+mod rust;
+mod fortran;
+mod matlab;
 
-use file_util::{process_folder, extract_language_extensions, consider_file, process_file,
+use common::{process_folder, extract_language_extensions, consider_file, process_file,
         supported_languages};
 
 fn main() {
