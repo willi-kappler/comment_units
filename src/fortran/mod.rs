@@ -29,8 +29,11 @@ named!(parse_many_comment_lines<&str, Vec<FortranTokenType> >, many0!(ws!(parse_
 
 named!(parse_identifier<&str, FortranTokenType>, do_parse!(
     head: alpha >>
-    tail: many0!(alt!(alphanumeric | tag!("_"))) >>
-    (FortranTokenType::Identifier(head.to_owned()))
+    tail: fold_many0!(alt!(alphanumeric | tag!("_")), String::new(), |mut acc: String, item| {
+        acc.push_str(item);
+        acc
+    }) >>
+    (FortranTokenType::Identifier(format!("{}{}", head, tail)))
 ));
 
 named!(parse_program<&str, Vec<FortranTokenType> >, do_parse!(
