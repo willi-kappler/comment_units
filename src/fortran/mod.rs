@@ -4,12 +4,11 @@ use std::fs::File;
 use std::io::Read;
 
 use nom::{alpha, alphanumeric};
-use nom;
 
 #[derive(PartialEq, Debug)]
 enum FortranTokenType {
-    Comment(String),            // Simgle line comment with !
-    Identifier(String),         // distance, particle_id
+     Comment(String),            // Single line comment with !
+     Identifier(String),         // distance, particle_id
 }
 
 #[derive(PartialEq, Debug)]
@@ -20,8 +19,7 @@ struct Token {
 }
 
 named!(parse_comment<&str, FortranTokenType>, do_parse!(
-    tag!("!") >>
-    comment: take_while!(call!(|c| c != '\n')) >>
+    tag!("!") >> comment: take_while!(call!(|c| c != '\n')) >>
     (FortranTokenType::Comment(comment.to_owned()))
 ));
 
@@ -37,18 +35,16 @@ named!(parse_identifier<&str, FortranTokenType>, do_parse!(
 ));
 
 named!(parse_program<&str, Vec<FortranTokenType> >, do_parse!(
-    ws!(tag!("program")) >>
-    ws!(parse_identifier) >>
-    ws!(tag!("end")) >>
-    ws!(tag!("program")) >>
+    ws!(tag!("program")) >> ws!(parse_identifier) >> ws!(opt!(parse_comment)) >>
+
+    ws!(tag!("end")) >> ws!(tag!("program")) >> ws!(parse_identifier) >> ws!(opt!(complete!(parse_comment))) >>
     (Vec::new())
 ));
 
 named!(parse_module<&str, Vec<FortranTokenType> >, do_parse!(
-    ws!(tag!("module")) >>
-    ws!(parse_identifier) >>
-    ws!(tag!("end")) >>
-    ws!(tag!("module")) >>
+    ws!(tag!("module")) >> ws!(parse_identifier) >> ws!(opt!(parse_comment)) >>
+
+    ws!(tag!("end")) >> ws!(tag!("module")) >> ws!(parse_identifier) >> ws!(opt!(complete!(parse_comment))) >>
     (Vec::new())
 ));
 
