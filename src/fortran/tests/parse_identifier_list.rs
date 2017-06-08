@@ -102,7 +102,7 @@ fn parse_identifier_list9() {
 #[test]
 fn parse_identifier_list10() {
     let input = "abc_123, xyz, person_id  ! These are very important";
-    let expected_output = IResult::Done("", vec![
+    let expected_output = IResult::Done("! These are very important", vec![
         FortranTokenType::Identifier("abc_123".to_owned()),
         FortranTokenType::Identifier("xyz".to_owned()),
         FortranTokenType::Identifier("person_id".to_owned())

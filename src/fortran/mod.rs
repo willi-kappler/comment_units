@@ -44,12 +44,10 @@ named!(parse_identifier_list<&str, Vec<FortranTokenType>>, do_parse!(
         content: ws!(parse_identifier) >>
         (content)
     )) >>
-    comment: ws!(parse_maybe_comment) >>
     ({
         let mut result = Vec::new();
         result.push(first);
         result.extend(rest);
-        // TODO: map comment into vector
         result
     })
 ));

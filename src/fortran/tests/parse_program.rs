@@ -14,6 +14,16 @@ fn parse_program1() {
 
 #[test]
 fn parse_program2() {
+    let input = "x";
+    let expected_output = IResult::Error(Err::Position(ErrorKind::Tag, "x"));
+
+    let result = parse_program(input);
+
+    assert_eq!(result, expected_output);
+}
+
+#[test]
+fn parse_program3() {
     let input = "program";
     let expected_output = IResult::Incomplete(Needed::Unknown);
 
@@ -23,7 +33,7 @@ fn parse_program2() {
 }
 
 #[test]
-fn parse_program3() {
+fn parse_program4() {
     let input = "program test_comment";
     let expected_output = IResult::Incomplete(Needed::Size(28));
 
@@ -33,7 +43,7 @@ fn parse_program3() {
 }
 
 #[test]
-fn parse_program4() {
+fn parse_program5() {
     let input = "program test_comment\nend";
     let expected_output = IResult::Incomplete(Needed::Size(31));
 
@@ -43,7 +53,7 @@ fn parse_program4() {
 }
 
 #[test]
-fn parse_program5() {
+fn parse_program6() {
     let input = "program test_comment\nend program";
     let expected_output = IResult::Incomplete(Needed::Unknown);
 
@@ -53,7 +63,7 @@ fn parse_program5() {
 }
 
 #[test]
-fn parse_program6() {
+fn parse_program7() {
     let input = "program test_comment\nend program test_comment";
     let expected_output = IResult::Done("", Vec::new());
 
@@ -63,7 +73,7 @@ fn parse_program6() {
 }
 
 #[test]
-fn parse_program7() {
+fn parse_program8() {
     let input = "program test_comment ! Test \nend program test_comment";
     let expected_output = IResult::Done("", Vec::new());
 
@@ -73,7 +83,7 @@ fn parse_program7() {
 }
 
 #[test]
-fn parse_program8() {
+fn parse_program9() {
     let input = "program test_comment ! Test \nend program test_comment ! Test";
     let expected_output = IResult::Done("", Vec::new());
 
@@ -83,7 +93,7 @@ fn parse_program8() {
 }
 
 #[test]
-fn parse_program9() {
+fn parse_program10() {
     let input = "program test_comment ! Test
         ! Some comments
         use util
@@ -98,7 +108,7 @@ fn parse_program9() {
 }
 
 #[test]
-fn parse_program10() {
+fn parse_program11() {
     let input = "program test_comment ! Test
         ! Some comments
         implicit none
@@ -112,7 +122,7 @@ fn parse_program10() {
 }
 
 #[test]
-fn parse_program11() {
+fn parse_program12() {
     let input = "program test_comment ! Test
         ! Some comments
         use util
