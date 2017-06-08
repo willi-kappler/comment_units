@@ -25,7 +25,7 @@ fn parse_program2() {
 #[test]
 fn parse_program3() {
     let input = "program test_comment";
-    let expected_output = IResult::Incomplete(Needed::Size(21));
+    let expected_output = IResult::Incomplete(Needed::Size(28));
 
     let result = parse_program(input);
 
@@ -75,6 +75,52 @@ fn parse_program7() {
 #[test]
 fn parse_program8() {
     let input = "program test_comment ! Test \nend program test_comment ! Test";
+    let expected_output = IResult::Done("", Vec::new());
+
+    let result = parse_program(input);
+
+    assert_eq!(result, expected_output);
+}
+
+#[test]
+fn parse_program9() {
+    let input = "program test_comment ! Test
+        ! Some comments
+        use util
+        use particle ! Has struct definition
+
+        end program test_comment ! Test";
+    let expected_output = IResult::Done("", Vec::new());
+
+    let result = parse_program(input);
+
+    assert_eq!(result, expected_output);
+}
+
+#[test]
+fn parse_program10() {
+    let input = "program test_comment ! Test
+        ! Some comments
+        implicit none
+
+        end program test_comment ! Test";
+    let expected_output = IResult::Done("", Vec::new());
+
+    let result = parse_program(input);
+
+    assert_eq!(result, expected_output);
+}
+
+#[test]
+fn parse_program11() {
+    let input = "program test_comment ! Test
+        ! Some comments
+        use util
+        implicit none ! Good practise
+
+        ! Code goes here
+
+        end program test_comment ! Test";
     let expected_output = IResult::Done("", Vec::new());
 
     let result = parse_program(input);

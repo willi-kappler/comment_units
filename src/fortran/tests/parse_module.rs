@@ -25,7 +25,7 @@ fn parse_module2() {
 #[test]
 fn parse_module3() {
     let input = "module test_comment";
-    let expected_output = IResult::Incomplete(Needed::Size(20));
+    let expected_output = IResult::Incomplete(Needed::Size(22));
 
     let result = parse_module(input);
 
