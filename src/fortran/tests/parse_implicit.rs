@@ -61,3 +61,13 @@ fn parse_implicit6() {
 
     assert_eq!(result, expected_output);
 }
+
+#[test]
+fn parse_implicit7() {
+    let input = "implicit x";
+    let expected_output = IResult::Error(Err::Position(ErrorKind::Tag, "x"));
+
+    let result = parse_implicit(input);
+
+    assert_eq!(result, expected_output);
+}

@@ -5,5 +5,6 @@
 #[cfg(test)] mod parse_identifier_list;
 #[cfg(test)] mod parse_use;
 #[cfg(test)] mod parse_implicit;
+#[cfg(test)] mod parse_type;
 #[cfg(test)] mod parse_program;
 #[cfg(test)] mod parse_module;
